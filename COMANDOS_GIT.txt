@@ -1,0 +1,43 @@
+🚀 COMANDOS PARA ENVIAR O PROJETO PARA O GITHUB
+
+📋 COPIE E COLE ESTES COMANDOS NO TERMINAL:
+
+1. Abrir terminal na pasta RecipeBookApp:
+   cd "RecipeBookApp"
+
+2. Inicializar Git (se necessário):
+   git init
+
+3. Adicionar todos os arquivos:
+   git add .
+
+4. Fazer o primeiro commit:
+   git commit -m "🎉 Initial commit: Recipe Book App completo
+
+✨ Funcionalidades implementadas:
+- 📱 Sistema completo de gerenciamento de receitas
+- 🔍 Busca avançada com filtros e busca por voz  
+- ⭐ Sistema de avaliações e anotações com histórico de versões
+- 📅 Planejamento de refeições com calendário interativo
+- 📋 Listas personalizadas e listas de compras automáticas
+- 📥 Importação inteligente de receitas via URLs e redes sociais
+- 👥 Recursos sociais e perfis de usuário
+- 🛠️ Implementação completa em TypeScript com Redux Toolkit"
+
+5. Conectar ao repositório GitHub (SUBSTITUA SEU_USUARIO):
+   git remote add origin https://github.com/SEU_USUARIO/recipe-book-app.git
+
+6. Renomear branch para main:
+   git branch -M main
+
+7. Enviar para o GitHub:
+   git push -u origin main
+
+📝 ANTES DE EXECUTAR:
+1. Crie o repositório no GitHub com o nome: recipe-book-app
+2. NÃO marque "Add README" nem "Add .gitignore" 
+3. Substitua "SEU_USUARIO" pelo seu username do GitHub
+
+🎯 DEPOIS DO UPLOAD:
+- Adicione a descrição: "📱 Aplicativo completo de receitas com planejamento de refeições, importação inteligente e recursos sociais"
+- Adicione os topics: react-native, typescript, recipe-app, meal-planning, mobile-app, redux-toolkit
