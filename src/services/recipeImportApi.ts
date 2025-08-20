@@ -49,21 +49,79 @@ export const recipeImportApi = createApi({
     }),
 
     // Importar receita de imagem
-    importFromImage: builder.mutation<ImportRecipeResponse, {imageBase64: string; options?: any}>({
-      query: ({imageBase64, options}) => ({
-        url: '/recipes/import/image',
-        method: 'POST',
-        body: {
-          source: 'image',
-          data: imageBase64,
-          options: {
-            extractNutrition: false,
-            autoCategories: true,
-            language: 'pt-BR',
-            ...options,
-          },
-        } as ImportRecipeRequest,
-      }),
+    importFromImage: builder.mutation<ImportRecipeResponse, {imageFile: File; options?: any}>({
+      query: ({imageFile, options}) => {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        if (options?.language) {
+          formData.append('language', options.language);
+        }
+        
+        return {
+          url: '/recipes/import/image',
+          method: 'POST',
+          body: formData,
+        };
+      },
+    }),
+
+    // Validar imagem para OCR
+    validateImage: builder.mutation<
+      {
+        isValid: boolean;
+        imageInfo: {
+          width: number;
+          height: number;
+          format: string;
+          size: number;
+        };
+        issues?: string[];
+        recommendations?: string[];
+      },
+      File
+    >({
+      query: (imageFile) => {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        
+        return {
+          url: '/recipes/import/validate-image',
+          method: 'POST',
+          body: formData,
+        };
+      },
+    }),
+
+    // Preview de OCR (extrair texto)
+    previewOCR: builder.mutation<
+      {
+        extractedText: string;
+        confidence: number;
+        textRegions: Array<{
+          text: string;
+          confidence: number;
+          boundingBox: {
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+          };
+        }>;
+        language?: string;
+        warnings?: string[];
+      },
+      File
+    >({
+      query: (imageFile) => {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        
+        return {
+          url: '/recipes/import/preview-ocr',
+          method: 'POST',
+          body: formData,
+        };
+      },
     }),
 
     // Importar de redes sociais
@@ -174,4 +232,6 @@ export const {
   useSaveImportedRecipeMutation,
   useGetImportHistoryQuery,
   useRetryImportMutation,
+  useValidateImageMutation,
+  usePreviewOCRMutation,
 } = recipeImportApi;

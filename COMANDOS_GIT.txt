@@ -12,7 +12,7 @@
    git add .
 
 4. Fazer o primeiro commit:
-   git commit -m "🎉 Initial commit: Recipe Book App completo
+   git commit -m "🎉 Initial commit: Recipe Book App completo"
 
 ✨ Funcionalidades implementadas:
 - 📱 Sistema completo de gerenciamento de receitas
@@ -25,7 +25,7 @@
 - 🛠️ Implementação completa em TypeScript com Redux Toolkit"
 
 5. Conectar ao repositório GitHub (SUBSTITUA SEU_USUARIO):
-   git remote add origin https://github.com/SEU_USUARIO/recipe-book-app.git
+   git remote add origin https://github.com/negriniainda/recipe-book-app.git
 
 6. Renomear branch para main:
    git branch -M main
