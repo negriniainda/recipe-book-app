@@ -17,11 +17,16 @@ import {
 import {
   useImportFromUrlMutation,
   useImportFromTextMutation,
+  useImportFromImageMutation,
   useImportFromSocialMutation,
   useValidateUrlQuery,
   useGetSupportedSitesQuery,
   useSaveImportedRecipeMutation,
+  useValidateImageMutation,
+  usePreviewOCRMutation,
 } from '../../services/recipeImportApi';
+import ImageCaptureModal from './ImageCaptureModal';
+import OCRReviewModal from './OCRReviewModal';
 import {ImportRecipeResponse, CreateRecipeInput} from '../../types';
 import {theme} from '../../utils/theme';
 
@@ -32,7 +37,7 @@ interface ImportRecipeModalProps {
 }
 
 type ImportStep = 'input' | 'importing' | 'preview' | 'saving';
-type ImportSource = 'url' | 'text' | 'social';
+type ImportSource = 'url' | 'text' | 'social' | 'ocr';
 
 const ImportRecipeModal: React.FC<ImportRecipeModalProps> = ({
   visible,
@@ -41,6 +46,10 @@ const ImportRecipeModal: React.FC<ImportRecipeModalProps> = ({
 }) => {
   const [step, setStep] = useState<ImportStep>('input');
   const [source, setSource] = useState<ImportSource>('url');
+  const [showImageCapture, setShowImageCapture] = useState(false);
+  const [showOCRReview, setShowOCRReview] = useState(false);
+  const [ocrResult, setOCRResult] = useState<any>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [importedData, setImportedData] = useState<ImportRecipeResponse | null>(null);
   const [importOptions, setImportOptions] = useState({
@@ -59,10 +68,13 @@ const ImportRecipeModal: React.FC<ImportRecipeModalProps> = ({
 
   const [importFromUrl, {isLoading: importingFromUrl}] = useImportFromUrlMutation();
   const [importFromText, {isLoading: importingFromText}] = useImportFromTextMutation();
+  const [importFromImage, {isLoading: importingFromImage}] = useImportFromImageMutation();
   const [importFromSocial, {isLoading: importingFromSocial}] = useImportFromSocialMutation();
   const [saveImportedRecipe, {isLoading: savingRecipe}] = useSaveImportedRecipeMutation();
+  const [validateImage] = useValidateImageMutation();
+  const [previewOCR] = usePreviewOCRMutation();
 
-  const isImporting = importingFromUrl || importingFromText || importingFromSocial;
+  const isImporting = importingFromUrl || importingFromText || importingFromImage || importingFromSocial;
   const isSaving = savingRecipe;
 
   // Reset form when modal opens/closes
@@ -72,6 +84,10 @@ const ImportRecipeModal: React.FC<ImportRecipeModalProps> = ({
       setSource('url');
       setInputValue('');
       setImportedData(null);
+      setShowImageCapture(false);
+      setShowOCRReview(false);
+      setOCRResult(null);
+      setSelectedImageFile(null);
     }
   }, [visible]);
 
@@ -176,11 +192,54 @@ const ImportRecipeModal: React.FC<ImportRecipeModalProps> = ({
     return null;
   };
 
+  const handleImageSelected = (file: File) => {
+    setSelectedImageFile(file);
+    setShowImageCapture(false);
+  };
+
+  const handleOCRPreview = async (file: File) => {
+    try {
+      const result = await previewOCR(file).unwrap();
+      setOCRResult(result);
+      setShowOCRReview(true);
+    } catch (error: any) {
+      Alert.alert(
+        'Erro no OCR',
+        error.message || 'Não foi possível processar a imagem.',
+        [{text: 'OK'}]
+      );
+    }
+  };
+
+  const handleOCRImport = async (file: File) => {
+    setStep('importing');
+
+    try {
+      const result = await importFromImage({
+        image: file,
+        options: importOptions,
+      }).unwrap();
+
+      setImportedData(result);
+      setStep('preview');
+      setShowOCRReview(false);
+    } catch (error: any) {
+      Alert.alert(
+        'Erro na Importação',
+        error.message || 'Não foi possível importar receita da imagem.',
+        [{text: 'OK'}]
+      );
+      setStep('input');
+      setShowOCRReview(false);
+    }
+  };
+
   const getSourceIcon = () => {
     switch (source) {
       case 'url': return 'link';
       case 'text': return 'text';
       case 'social': return 'share';
+      case 'ocr': return 'camera';
       default: return 'import';
     }
   };
@@ -217,36 +276,67 @@ const ImportRecipeModal: React.FC<ImportRecipeModalProps> = ({
           style={styles.sourceButton}>
           Texto
         </Button>
+        <Button
+          mode={source === 'ocr' ? 'contained' : 'outlined'}
+          icon="camera"
+          onPress={() => {
+            setSource('ocr');
+            setShowImageCapture(true);
+          }}
+          style={styles.sourceButton}>
+          Foto/OCR
+        </Button>
       </View>
 
       {/* Input Field */}
-      <TextInput
-        mode="outlined"
-        label={
-          source === 'url' 
-            ? 'Cole o link da receita' 
-            : source === 'social'
-            ? 'Link do Instagram, TikTok ou YouTube'
-            : 'Cole o texto da receita'
-        }
-        placeholder={
-          source === 'url'
-            ? 'https://exemplo.com/receita'
-            : source === 'social'
-            ? 'https://instagram.com/p/...'
-            : 'Ingredientes:\n- 2 ovos\n- 1 xícara de farinha...'
-        }
-        value={inputValue}
-        onChangeText={setInputValue}
-        multiline={source === 'text'}
-        numberOfLines={source === 'text' ? 6 : 1}
-        style={styles.input}
-        right={
-          source === 'url' && validatingUrl ? (
-            <TextInput.Icon icon="loading" />
-          ) : undefined
-        }
-      />
+      {source !== 'ocr' && (
+        <TextInput
+          mode="outlined"
+          label={
+            source === 'url' 
+              ? 'Cole o link da receita' 
+              : source === 'social'
+              ? 'Link do Instagram, TikTok ou YouTube'
+              : 'Cole o texto da receita'
+          }
+          placeholder={
+            source === 'url'
+              ? 'https://exemplo.com/receita'
+              : source === 'social'
+              ? 'https://instagram.com/p/...'
+              : 'Ingredientes:\n- 2 ovos\n- 1 xícara de farinha...'
+          }
+          value={inputValue}
+          onChangeText={setInputValue}
+          multiline={source === 'text'}
+          numberOfLines={source === 'text' ? 6 : 1}
+          style={styles.input}
+          right={
+            source === 'url' && validatingUrl ? (
+              <TextInput.Icon icon="loading" />
+            ) : undefined
+          }
+        />
+      )}
+
+      {/* OCR Info */}
+      {source === 'ocr' && (
+        <Card style={styles.ocrInfoCard}>
+          <Card.Content>
+            <Text variant="titleSmall" style={styles.ocrInfoTitle}>
+              📸 Importação por OCR
+            </Text>
+            <Text variant="bodySmall" style={styles.ocrInfoText}>
+              Fotografe ou selecione uma imagem da receita. O texto será extraído automaticamente e você poderá revisar antes de importar.
+            </Text>
+            {selectedImageFile && (
+              <Chip icon="check" mode="outlined" style={styles.selectedImageChip}>
+                Imagem selecionada: {selectedImageFile.name}
+              </Chip>
+            )}
+          </Card.Content>
+        </Card>
+      )}
 
       {/* URL Validation */}
       {source === 'url' && urlValidation && inputValue.length > 10 && (
@@ -347,10 +437,10 @@ const ImportRecipeModal: React.FC<ImportRecipeModalProps> = ({
       <Button
         mode="contained"
         icon={getSourceIcon()}
-        onPress={handleImport}
-        disabled={!inputValue.trim() || validatingUrl}
+        onPress={source === 'ocr' ? () => setShowImageCapture(true) : handleImport}
+        disabled={(source !== 'ocr' && !inputValue.trim()) || validatingUrl}
         style={styles.importButton}>
-        Importar Receita
+        {source === 'ocr' ? 'Capturar Imagem' : 'Importar Receita'}
       </Button>
     </View>
   );
@@ -577,6 +667,23 @@ const ImportRecipeModal: React.FC<ImportRecipeModalProps> = ({
         <View style={styles.content}>
           {renderCurrentStep()}
         </View>
+
+        {/* Image Capture Modal */}
+        <ImageCaptureModal
+          visible={showImageCapture}
+          onDismiss={() => setShowImageCapture(false)}
+          onImageSelected={handleImageSelected}
+          onPreviewOCR={handleOCRPreview}
+        />
+
+        {/* OCR Review Modal */}
+        <OCRReviewModal
+          visible={showOCRReview}
+          onDismiss={() => setShowOCRReview(false)}
+          ocrResult={ocrResult}
+          onImport={handleOCRImport}
+          selectedImage={selectedImageFile}
+        />
       </Modal>
     </Portal>
   );
@@ -697,6 +804,27 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  ocrInfoCard: {
+    marginBottom: 16,
+    elevation: 1,
+    backgroundColor: '#E3F2FD',
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196F3',
+  },
+  ocrInfoTitle: {
+    fontWeight: '600',
+    color: '#1976D2',
+    marginBottom: 8,
+  },
+  ocrInfoText: {
+    color: '#1976D2',
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  selectedImageChip: {
+    backgroundColor: '#C8E6C9',
+    borderColor: '#4CAF50',
   },
   importButton: {
     marginTop: 8,
