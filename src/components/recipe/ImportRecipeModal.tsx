@@ -154,8 +154,6 @@ const ImportRecipeModal: React.FC<ImportRecipeModalProps> = ({
         isFavorite: false,
         rating: 0,
         notes: `Importado de: ${source === 'url' ? inputValue : 'texto'}`,
-        likes: 0,
-        comments: [],
       };
 
       const savedRecipe = await saveImportedRecipe(recipeData).unwrap();

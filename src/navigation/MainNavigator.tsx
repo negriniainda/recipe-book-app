@@ -5,15 +5,11 @@ import {Icon} from 'react-native-paper';
 import {theme} from '@/utils/theme';
 
 // Importar navegadores de cada seção
-import HomeNavigator from './HomeNavigator';
 import RecipesNavigator from './RecipesNavigator';
-import PlanningNavigator from './PlanningNavigator';
-import CommunityNavigator from './CommunityNavigator';
-import ProfileNavigator from './ProfileNavigator';
+import {ShoppingListNavigator} from './ShoppingListNavigator';
 
 // Placeholder screens (serão implementadas nas próximas tarefas)
 import HomeScreen from '@/screens/home/HomeScreen';
-import RecipesScreen from '@/screens/recipe/RecipesScreen';
 import PlanningScreen from '@/screens/planning/PlanningScreen';
 import CommunityScreen from '@/screens/community/CommunityScreen';
 import ProfileScreen from '@/screens/auth/ProfileScreen';
@@ -22,6 +18,7 @@ export type MainTabParamList = {
   HomeTab: undefined;
   RecipesTab: undefined;
   PlanningTab: undefined;
+  ShoppingListTab: undefined;
   CommunityTab: undefined;
   ProfileTab: undefined;
 };
@@ -45,6 +42,9 @@ const MainNavigator: React.FC = () => {
               break;
             case 'PlanningTab':
               iconName = focused ? 'calendar' : 'calendar-outline';
+              break;
+            case 'ShoppingListTab':
+              iconName = focused ? 'cart' : 'cart-outline';
               break;
             case 'CommunityTab':
               iconName = focused ? 'account-group' : 'account-group-outline';
@@ -93,10 +93,11 @@ const MainNavigator: React.FC = () => {
       />
       <Tab.Screen
         name="RecipesTab"
-        component={RecipesScreen}
+        component={RecipesNavigator}
         options={{
           title: 'Receitas',
           tabBarLabel: 'Receitas',
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -105,6 +106,15 @@ const MainNavigator: React.FC = () => {
         options={{
           title: 'Planejamento',
           tabBarLabel: 'Planejar',
+        }}
+      />
+      <Tab.Screen
+        name="ShoppingListTab"
+        component={ShoppingListNavigator}
+        options={{
+          title: 'Lista de Compras',
+          tabBarLabel: 'Compras',
+          headerShown: false,
         }}
       />
       <Tab.Screen

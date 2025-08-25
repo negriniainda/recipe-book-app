@@ -4,6 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {api} from '@/services/api';
 import {planningApi} from '@/services/planningApi';
 import {ratingsApi} from '@/services/ratingsApi';
+import {shoppingListApi} from '@/services/shoppingListApi';
+import {cookingModeApi} from '@/services/cookingModeApi';
+import {sharingApi} from '@/services/sharingApi';
 
 // Importar reducers
 import authReducer from './slices/authSlice';
@@ -22,6 +25,9 @@ const rootReducer = combineReducers({
   [api.reducerPath]: api.reducer,
   [planningApi.reducerPath]: planningApi.reducer,
   [ratingsApi.reducerPath]: ratingsApi.reducer,
+  [shoppingListApi.reducerPath]: shoppingListApi.reducer,
+  [cookingModeApi.reducerPath]: cookingModeApi.reducer,
+  [sharingApi.reducerPath]: sharingApi.reducer,
 });
 
 // Configuração de persistência
@@ -29,7 +35,7 @@ const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
   whitelist: ['auth', 'recipes', 'planning', 'lists'], // Apenas estes serão persistidos
-  blacklist: ['ui', api.reducerPath, planningApi.reducerPath, ratingsApi.reducerPath], // UI e API não devem ser persistidos
+  blacklist: ['ui', api.reducerPath, planningApi.reducerPath, ratingsApi.reducerPath, shoppingListApi.reducerPath, cookingModeApi.reducerPath, sharingApi.reducerPath], // UI e API não devem ser persistidos
 };
 
 // Reducer com persistência
@@ -50,7 +56,7 @@ export const store = configureStore({
         ],
         ignoredPaths: ['register'],
       },
-    }).concat(api.middleware, planningApi.middleware, ratingsApi.middleware),
+    }).concat(api.middleware, planningApi.middleware, ratingsApi.middleware, shoppingListApi.middleware, cookingModeApi.middleware, sharingApi.middleware),
   devTools: __DEV__,
 });
 

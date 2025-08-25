@@ -18,6 +18,7 @@ import {
 } from '@/store/slices/recipesSlice';
 import {Recipe, RecipeFilters} from '@/types';
 import {SearchBar, FilterModal, SearchResults, QuickFilters} from '@/components/search';
+import QuickImportButton from '@/components/recipe/QuickImportButton';
 import {useVoiceSearch} from '@/hooks/useVoiceSearch';
 import {theme} from '@/utils/theme';
 
@@ -177,6 +178,13 @@ const RecipesScreen: React.FC = () => {
     // navigation.navigate('ImportRecipe');
   }, []);
 
+  const handleImportSuccess = useCallback((recipe: any) => {
+    // Atualizar lista de receitas após importação bem-sucedida
+    refetchRecipes();
+    // TODO: Mostrar toast de sucesso
+    // showToast(`Receita "${recipe.title}" importada com sucesso!`, 'success');
+  }, [refetchRecipes]);
+
   const handleVoiceSearch = useCallback(async () => {
     if (!voiceAvailable) {
       return;
@@ -292,6 +300,12 @@ const RecipesScreen: React.FC = () => {
         style={styles.fab}
         onPress={handleAddRecipe}
       />
+
+      {/* Botão de importação rápida */}
+      <QuickImportButton
+        onSuccess={handleImportSuccess}
+        style={styles.importFab}
+      />
     </View>
   );
 };
@@ -320,6 +334,13 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: theme.colors.primary,
+  },
+  importFab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 80,
+    backgroundColor: theme.colors.secondary,
   },
 });
 

@@ -130,7 +130,7 @@ export const recipeImportApi = createApi({
         method: 'POST',
         body: recipeData,
       }),
-      invalidatesTags: ['Recipe'],
+      invalidatesTags: ['Import'],
     }),
 
     // Histórico de importações
