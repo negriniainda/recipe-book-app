@@ -1,51 +1,46 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Card, Text, IconButton, Chip, Avatar } from 'react-native-paper';
-import { Recipe } from '@/types';
-import { theme } from '@/utils/theme';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Recipe } from '../../types/recipe';
+import { AccessibilityWrapper } from '../accessibility/AccessibilityWrapper';
 
 interface RecipeCardProps {
   recipe: Recipe;
-  onPress: (recipe: Recipe) => void;
-  onFavorite?: (recipeId: string) => void;
-  showActions?: boolean;
-  variant?: 'default' | 'compact' | 'detailed';
+  onFavorite?: (recipe: Recipe) => void;
+  onShare?: (recipe: Recipe) => void;
+  style?: any;
+  compact?: boolean;
 }
 
-const RecipeCard: React.FC<RecipeCardProps> = ({
+export const RecipeCard: React.FC<RecipeCardProps> = ({
   recipe,
-  onPress,
   onFavorite,
-  showActions = true,
-  variant = 'default',
+  onShare,
+  style,
+  compact = false,
 }) => {
-  const handleFavoritePress = () => {
-    onFavorite?.(recipe.id);
+  const navigation = useNavigation();
+
+  const handlePress = () => {
+    navigation.navigate('RecipeDetails' as never, { recipeId: recipe.id } as never);
   };
 
-  const formatTime = (minutes: number): string => {
-    if (minutes < 60) {
-      return `${minutes}min`;
-    }
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}min` : `${hours}h`;
+  const handleFavorite = () => {
+    onFavorite?.(recipe);
   };
 
-  const getDifficultyColor = (difficulty: Recipe['difficulty']): string => {
-    switch (difficulty) {
-      case 'easy':
-        return '#4caf50';
-      case 'medium':
-        return '#ff9800';
-      case 'hard':
-        return '#f44336';
-      default:
-        return theme.colors.primary;
-    }
+  const handleShare = () => {
+    onShare?.(recipe);
   };
 
-  const getDifficultyLabel = (difficulty: Recipe['difficulty']): string => {
+  const getDifficultyLabel = (difficulty: string) => {
     switch (difficulty) {
       case 'easy':
         return 'Fácil';
@@ -58,154 +53,130 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     }
   };
 
-  if (variant === 'compact') {
-    return (
-      <TouchableOpacity onPress={() => onPress(recipe)} style={styles.compactContainer}>
-        <View style={styles.compactContent}>
-          {recipe.images[0] && (
-            <Image source={{ uri: recipe.images[0] }} style={styles.compactImage} />
-          )}
-          <View style={styles.compactInfo}>
-            <Text variant="titleSmall" numberOfLines={2} style={styles.compactTitle}>
-              {recipe.title}
-            </Text>
-            <Text variant="bodySmall" style={styles.compactTime}>
-              {formatTime(recipe.prepTime + recipe.cookTime)}
-            </Text>
-          </View>
-          {showActions && (
-            <IconButton
-              icon={recipe.isFavorite ? 'heart' : 'heart-outline'}
-              iconColor={recipe.isFavorite ? '#f44336' : theme.colors.onSurface}
-              size={20}
-              onPress={handleFavoritePress}
-            />
-          )}
-        </View>
-      </TouchableOpacity>
-    );
-  }
+  const getServingsLabel = (servings: number) => {
+    return servings === 1 ? '1 porção' : `${servings} porções`;
+  };
 
   return (
-    <Card style={styles.card} onPress={() => onPress(recipe)}>
-      {recipe.images[0] && (
-        <Card.Cover 
-          source={{ uri: recipe.images[0] }} 
-          style={styles.cover}
-        />
-      )}
-      
-      <Card.Content style={styles.content}>
-        <View style={styles.header}>
-          <Text variant="titleMedium" numberOfLines={2} style={styles.title}>
-            {recipe.title}
-          </Text>
-          {showActions && (
-            <IconButton
-              icon={recipe.isFavorite ? 'heart' : 'heart-outline'}
-              iconColor={recipe.isFavorite ? '#f44336' : theme.colors.onSurface}
-              size={24}
-              onPress={handleFavoritePress}
-              style={styles.favoriteButton}
-            />
-          )}
-        </View>
-
-        {recipe.description && (
-          <Text variant="bodySmall" numberOfLines={2} style={styles.description}>
-            {recipe.description}
-          </Text>
+    <AccessibilityWrapper
+      accessibilityRole="button"
+      accessibilityLabel={`Receita ${recipe.title}`}
+      accessibilityHint="Toque para ver os detalhes da receita"
+    >
+      <TouchableOpacity
+        style={[styles.container, compact && styles.compactContainer, style]}
+        onPress={handlePress}
+        activeOpacity={0.7}
+      >
+        {recipe.images && recipe.images.length > 0 && (
+          <Image
+            source={{ uri: recipe.images[0] }}
+            style={[styles.image, compact && styles.compactImage]}
+            resizeMode="cover"
+          />
         )}
 
-        <View style={styles.metadata}>
-          <View style={styles.timeContainer}>
-            <IconButton icon="clock-outline" size={16} style={styles.timeIcon} />
-            <Text variant="bodySmall" style={styles.timeText}>
-              {formatTime(recipe.prepTime + recipe.cookTime)}
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={[styles.title, compact && styles.compactTitle]} numberOfLines={2}>
+              {recipe.title}
             </Text>
-          </View>
 
-          <View style={styles.servingsContainer}>
-            <IconButton icon="account-group-outline" size={16} style={styles.servingsIcon} />
-            <Text variant="bodySmall" style={styles.servingsText}>
-              {recipe.servings} {recipe.servings === 1 ? 'porção' : 'porções'}
-            </Text>
-          </View>
+            <View style={styles.actions}>
+              {onFavorite && (
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={handleFavorite}
+                  accessibilityLabel="Adicionar aos favoritos"
+                  accessibilityRole="button"
+                >
+                  <Icon name="heart-outline" size={20} color="#666" />
+                </TouchableOpacity>
+              )}
 
-          <Chip
-            mode="outlined"
-            textStyle={[styles.difficultyText, { color: getDifficultyColor(recipe.difficulty) }]}
-            style={[styles.difficultyChip, { borderColor: getDifficultyColor(recipe.difficulty) }]}
-          >
-            {getDifficultyLabel(recipe.difficulty)}
-          </Chip>
-        </View>
-
-        {variant === 'detailed' && (
-          <>
-            <View style={styles.tags}>
-              {recipe.tags.slice(0, 3).map((tag, index) => (
-                <Chip key={index} mode="outlined" compact style={styles.tag}>
-                  {tag}
-                </Chip>
-              ))}
-              {recipe.tags.length > 3 && (
-                <Text variant="bodySmall" style={styles.moreTagsText}>
-                  +{recipe.tags.length - 3} mais
-                </Text>
+              {onShare && (
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={handleShare}
+                  accessibilityLabel="Compartilhar receita"
+                  accessibilityRole="button"
+                >
+                  <Icon name="share-outline" size={20} color="#666" />
+                </TouchableOpacity>
               )}
             </View>
-
-            {recipe.originalAuthor && (
-              <View style={styles.authorContainer}>
-                <Avatar.Icon size={24} icon="chef-hat" style={styles.authorAvatar} />
-                <Text variant="bodySmall" style={styles.authorText}>
-                  Por {recipe.originalAuthor}
-                </Text>
-              </View>
-            )}
-          </>
-        )}
-
-        <View style={styles.footer}>
-          <View style={styles.stats}>
-            {recipe.likes > 0 && (
-              <View style={styles.stat}>
-                <IconButton icon="heart" size={16} iconColor="#f44336" style={styles.statIcon} />
-                <Text variant="bodySmall" style={styles.statText}>
-                  {recipe.likes}
-                </Text>
-              </View>
-            )}
-            {recipe.rating && (
-              <View style={styles.stat}>
-                <IconButton icon="star" size={16} iconColor="#ffc107" style={styles.statIcon} />
-                <Text variant="bodySmall" style={styles.statText}>
-                  {recipe.rating.toFixed(1)}
-                </Text>
-              </View>
-            )}
           </View>
 
-          <Text variant="bodySmall" style={styles.dateText}>
-            {new Date(recipe.createdAt).toLocaleDateString('pt-BR')}
-          </Text>
+          {!compact && recipe.description && (
+            <Text style={styles.description} numberOfLines={2}>
+              {recipe.description}
+            </Text>
+          )}
+
+          <View style={styles.metadata}>
+            <View style={styles.timeInfo}>
+              <Icon name="clock-outline" size={14} color="#666" />
+              <Text style={styles.timeText}>{recipe.prepTime} min</Text>
+              
+              <Icon name="fire" size={14} color="#666" style={styles.cookIcon} />
+              <Text style={styles.timeText}>{recipe.cookTime} min</Text>
+            </View>
+
+            <View style={styles.servingsInfo}>
+              <Icon name="account-group-outline" size={14} color="#666" />
+              <Text style={styles.servingsText}>
+                {getServingsLabel(recipe.servings)}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            <View style={styles.difficulty}>
+              <Text style={styles.difficultyText}>
+                {getDifficultyLabel(recipe.difficulty)}
+              </Text>
+            </View>
+
+            <View style={styles.rating}>
+              <Icon name="star" size={14} color="#FFD700" />
+              <Text style={styles.ratingText}>{recipe.rating.toFixed(1)}</Text>
+              <Text style={styles.reviewCount}>({recipe.reviewCount})</Text>
+            </View>
+          </View>
         </View>
-      </Card.Content>
-    </Card>
+      </TouchableOpacity>
+    </AccessibilityWrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
-    marginBottom: 16,
-    elevation: 2,
+  container: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    overflow: 'hidden',
   },
-  cover: {
+  compactContainer: {
+    flexDirection: 'row',
+    marginVertical: 4,
+  },
+  image: {
+    width: '100%',
     height: 200,
   },
+  compactImage: {
+    width: 80,
+    height: 80,
+  },
   content: {
-    paddingBottom: 12,
+    padding: 16,
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
@@ -214,138 +185,85 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
     flex: 1,
-    fontWeight: 'bold',
     marginRight: 8,
   },
-  favoriteButton: {
-    margin: 0,
-    marginTop: -8,
+  compactTitle: {
+    fontSize: 16,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  actionButton: {
+    padding: 4,
   },
   description: {
-    opacity: 0.7,
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
     marginBottom: 12,
-    lineHeight: 18,
   },
   metadata: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
-    flexWrap: 'wrap',
   },
-  timeContainer: {
+  timeInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16,
-  },
-  timeIcon: {
-    margin: 0,
-    marginRight: 4,
   },
   timeText: {
-    opacity: 0.7,
-  },
-  servingsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  servingsIcon: {
-    margin: 0,
-    marginRight: 4,
-  },
-  servingsText: {
-    opacity: 0.7,
-  },
-  difficultyChip: {
-    height: 24,
-  },
-  difficultyText: {
     fontSize: 12,
-    fontWeight: '500',
+    color: '#666',
+    marginLeft: 4,
+    marginRight: 12,
   },
-  tags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 12,
-    gap: 6,
-  },
-  tag: {
-    height: 24,
-    marginRight: 0,
-  },
-  moreTagsText: {
-    opacity: 0.7,
-    alignSelf: 'center',
+  cookIcon: {
     marginLeft: 8,
   },
-  authorContainer: {
+  servingsInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
   },
-  authorAvatar: {
-    backgroundColor: theme.colors.primary,
-    marginRight: 8,
-  },
-  authorText: {
-    opacity: 0.7,
-    fontStyle: 'italic',
+  servingsText: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 4,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  stats: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  difficulty: {
+    backgroundColor: '#F0F0F0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
-  stat: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  statIcon: {
-    margin: 0,
-    marginRight: 2,
-  },
-  statText: {
-    opacity: 0.7,
+  difficultyText: {
     fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
   },
-  dateText: {
-    opacity: 0.5,
-    fontSize: 11,
-  },
-  // Compact variant styles
-  compactContainer: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.roundness,
-    marginBottom: 8,
-    elevation: 1,
-  },
-  compactContent: {
+  rating: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
   },
-  compactImage: {
-    width: 60,
-    height: 60,
-    borderRadius: theme.roundness,
-    marginRight: 12,
+  ratingText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 4,
   },
-  compactInfo: {
-    flex: 1,
-  },
-  compactTitle: {
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  compactTime: {
-    opacity: 0.7,
+  reviewCount: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 4,
   },
 });
-
-export default RecipeCard;
