@@ -9,6 +9,9 @@ import {cookingModeApi} from '@/services/cookingModeApi';
 import {sharingApi} from '@/services/sharingApi';
 import {communityApi} from '../services/communityApi';
 import {privacyApi} from '../services/privacyApi';
+import {syncApi} from '../services/syncApi';
+import {accessibilityApi} from '../services/accessibilityApi';
+import {notificationsApi} from '../services/notificationsApi';
 
 // Importar reducers
 import authReducer from './slices/authSlice';
@@ -32,6 +35,9 @@ const rootReducer = combineReducers({
   [sharingApi.reducerPath]: sharingApi.reducer,
   [communityApi.reducerPath]: communityApi.reducer,
   [privacyApi.reducerPath]: privacyApi.reducer,
+  [syncApi.reducerPath]: syncApi.reducer,
+  [accessibilityApi.reducerPath]: accessibilityApi.reducer,
+  [notificationsApi.reducerPath]: notificationsApi.reducer,
 });
 
 // Configuração de persistência
@@ -39,7 +45,7 @@ const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
   whitelist: ['auth', 'recipes', 'planning', 'lists'], // Apenas estes serão persistidos
-  blacklist: ['ui', api.reducerPath, planningApi.reducerPath, ratingsApi.reducerPath, shoppingListApi.reducerPath, cookingModeApi.reducerPath, sharingApi.reducerPath, communityApi.reducerPath, privacyApi.reducerPath], // UI e API não devem ser persistidos
+  blacklist: ['ui', api.reducerPath, planningApi.reducerPath, ratingsApi.reducerPath, shoppingListApi.reducerPath, cookingModeApi.reducerPath, sharingApi.reducerPath, communityApi.reducerPath, privacyApi.reducerPath, syncApi.reducerPath, accessibilityApi.reducerPath, notificationsApi.reducerPath], // UI e API não devem ser persistidos
 };
 
 // Reducer com persistência
@@ -60,7 +66,7 @@ export const store = configureStore({
         ],
         ignoredPaths: ['register'],
       },
-    }).concat(api.middleware, planningApi.middleware, ratingsApi.middleware, shoppingListApi.middleware, cookingModeApi.middleware, sharingApi.middleware, communityApi.middleware, privacyApi.middleware),
+    }).concat(api.middleware, planningApi.middleware, ratingsApi.middleware, shoppingListApi.middleware, cookingModeApi.middleware, sharingApi.middleware, communityApi.middleware, privacyApi.middleware, syncApi.middleware, accessibilityApi.middleware, notificationsApi.middleware),
   devTools: __DEV__,
 });
 

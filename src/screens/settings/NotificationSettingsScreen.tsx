@@ -19,8 +19,8 @@ import {
   Dialog,
   Portal,
 } from 'react-native-paper';
-import { useNotificationSettings } from '../../hooks/usePrivacy';
-import { NOTIFICATION_FREQUENCY_OPTIONS } from '../../types/privacy';
+import { useNotificationSettings } from '../../hooks/useNotifications';
+import { EMAIL_FREQUENCIES, NOTIFICATION_CATEGORIES } from '../../types/notifications';
 
 interface NotificationSettingsScreenProps {
   navigation: any;
@@ -41,7 +41,7 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
     enableEssentialNotifications,
     isUpdating,
     isDisabling,
-    isEnabling,
+    isEnablingEssential,
   } = useNotificationSettings();
 
   const handleUpdateSetting = useCallback(async (path: string[], value: any) => {
@@ -81,7 +81,7 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
   }, [tempStartTime, tempEndTime, updateSettings]);
 
   const getFrequencyLabel = (frequency: string) => {
-    const option = NOTIFICATION_FREQUENCY_OPTIONS.find(opt => opt.value === frequency);
+    const option = EMAIL_FREQUENCIES.find(opt => opt.value === frequency);
     return option?.label || frequency;
   };
 
@@ -150,8 +150,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
               <Button
                 mode="outlined"
                 onPress={enableEssentialNotifications}
-                disabled={isEnabling}
-                loading={isEnabling}
+                disabled={isEnablingEssential}
+                loading={isEnablingEssential}
                 style={styles.quickActionButton}
               >
                 Apenas Essenciais
@@ -197,8 +197,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="account-plus" />}
                 right={() => (
                   <Switch
-                    value={settings.email.types.follows}
-                    onValueChange={(value) => handleUpdateSetting(['email', 'types', 'follows'], value)}
+                    value={settings.email.categories?.newFollowers || false}
+                    onValueChange={(value) => handleUpdateSetting(['email', 'categories', 'newFollowers'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -210,8 +210,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="comment" />}
                 right={() => (
                   <Switch
-                    value={settings.email.types.comments}
-                    onValueChange={(value) => handleUpdateSetting(['email', 'types', 'comments'], value)}
+                    value={settings.email.categories?.comments || false}
+                    onValueChange={(value) => handleUpdateSetting(['email', 'categories', 'comments'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -223,8 +223,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="heart" />}
                 right={() => (
                   <Switch
-                    value={settings.email.types.likes}
-                    onValueChange={(value) => handleUpdateSetting(['email', 'types', 'likes'], value)}
+                    value={settings.email.categories?.likes || false}
+                    onValueChange={(value) => handleUpdateSetting(['email', 'categories', 'likes'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -236,8 +236,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="at" />}
                 right={() => (
                   <Switch
-                    value={settings.email.types.mentions}
-                    onValueChange={(value) => handleUpdateSetting(['email', 'types', 'mentions'], value)}
+                    value={settings.email.categories?.mentions || false}
+                    onValueChange={(value) => handleUpdateSetting(['email', 'categories', 'mentions'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -249,8 +249,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="book-open" />}
                 right={() => (
                   <Switch
-                    value={settings.email.types.recipes}
-                    onValueChange={(value) => handleUpdateSetting(['email', 'types', 'recipes'], value)}
+                    value={settings.email.categories?.recipeUpdates || false}
+                    onValueChange={(value) => handleUpdateSetting(['email', 'categories', 'recipeUpdates'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -262,8 +262,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="account-group" />}
                 right={() => (
                   <Switch
-                    value={settings.email.types.community}
-                    onValueChange={(value) => handleUpdateSetting(['email', 'types', 'community'], value)}
+                    value={settings.email.categories?.communityUpdates || false}
+                    onValueChange={(value) => handleUpdateSetting(['email', 'categories', 'communityUpdates'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -275,8 +275,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="bullhorn" />}
                 right={() => (
                   <Switch
-                    value={settings.email.types.marketing}
-                    onValueChange={(value) => handleUpdateSetting(['email', 'types', 'marketing'], value)}
+                    value={settings.email.categories?.promotions || false}
+                    onValueChange={(value) => handleUpdateSetting(['email', 'categories', 'promotions'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -312,8 +312,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="account-plus" />}
                 right={() => (
                   <Switch
-                    value={settings.push.types.follows}
-                    onValueChange={(value) => handleUpdateSetting(['push', 'types', 'follows'], value)}
+                    value={settings.push.categories?.newFollowers || false}
+                    onValueChange={(value) => handleUpdateSetting(['push', 'categories', 'newFollowers'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -325,8 +325,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="comment" />}
                 right={() => (
                   <Switch
-                    value={settings.push.types.comments}
-                    onValueChange={(value) => handleUpdateSetting(['push', 'types', 'comments'], value)}
+                    value={settings.push.categories?.comments || false}
+                    onValueChange={(value) => handleUpdateSetting(['push', 'categories', 'comments'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -338,8 +338,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="heart" />}
                 right={() => (
                   <Switch
-                    value={settings.push.types.likes}
-                    onValueChange={(value) => handleUpdateSetting(['push', 'types', 'likes'], value)}
+                    value={settings.push.categories?.likes || false}
+                    onValueChange={(value) => handleUpdateSetting(['push', 'categories', 'likes'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -351,8 +351,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="at" />}
                 right={() => (
                   <Switch
-                    value={settings.push.types.mentions}
-                    onValueChange={(value) => handleUpdateSetting(['push', 'types', 'mentions'], value)}
+                    value={settings.push.categories?.mentions || false}
+                    onValueChange={(value) => handleUpdateSetting(['push', 'categories', 'mentions'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -364,8 +364,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="book-open" />}
                 right={() => (
                   <Switch
-                    value={settings.push.types.recipes}
-                    onValueChange={(value) => handleUpdateSetting(['push', 'types', 'recipes'], value)}
+                    value={settings.push.categories?.recipeUpdates || false}
+                    onValueChange={(value) => handleUpdateSetting(['push', 'categories', 'recipeUpdates'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -377,8 +377,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="account-group" />}
                 right={() => (
                   <Switch
-                    value={settings.push.types.community}
-                    onValueChange={(value) => handleUpdateSetting(['push', 'types', 'community'], value)}
+                    value={settings.push.categories?.communityUpdates || false}
+                    onValueChange={(value) => handleUpdateSetting(['push', 'categories', 'communityUpdates'], value)}
                     disabled={isUpdating}
                   />
                 )}
@@ -390,8 +390,8 @@ const NotificationSettingsScreen: React.FC<NotificationSettingsScreenProps> = ({
                 left={(props) => <List.Icon {...props} icon="alarm" />}
                 right={() => (
                   <Switch
-                    value={settings.push.types.reminders}
-                    onValueChange={(value) => handleUpdateSetting(['push', 'types', 'reminders'], value)}
+                    value={settings.push.categories?.mealReminders || false}
+                    onValueChange={(value) => handleUpdateSetting(['push', 'categories', 'mealReminders'], value)}
                     disabled={isUpdating}
                   />
                 )}
