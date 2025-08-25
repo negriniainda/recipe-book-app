@@ -7,6 +7,7 @@ import {ratingsApi} from '@/services/ratingsApi';
 import {shoppingListApi} from '@/services/shoppingListApi';
 import {cookingModeApi} from '@/services/cookingModeApi';
 import {sharingApi} from '@/services/sharingApi';
+import {communityApi} from '../services/communityApi';
 
 // Importar reducers
 import authReducer from './slices/authSlice';
@@ -28,6 +29,7 @@ const rootReducer = combineReducers({
   [shoppingListApi.reducerPath]: shoppingListApi.reducer,
   [cookingModeApi.reducerPath]: cookingModeApi.reducer,
   [sharingApi.reducerPath]: sharingApi.reducer,
+  [communityApi.reducerPath]: communityApi.reducer,
 });
 
 // Configuração de persistência
@@ -35,7 +37,7 @@ const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
   whitelist: ['auth', 'recipes', 'planning', 'lists'], // Apenas estes serão persistidos
-  blacklist: ['ui', api.reducerPath, planningApi.reducerPath, ratingsApi.reducerPath, shoppingListApi.reducerPath, cookingModeApi.reducerPath, sharingApi.reducerPath], // UI e API não devem ser persistidos
+  blacklist: ['ui', api.reducerPath, planningApi.reducerPath, ratingsApi.reducerPath, shoppingListApi.reducerPath, cookingModeApi.reducerPath, sharingApi.reducerPath, communityApi.reducerPath], // UI e API não devem ser persistidos
 };
 
 // Reducer com persistência
@@ -56,7 +58,7 @@ export const store = configureStore({
         ],
         ignoredPaths: ['register'],
       },
-    }).concat(api.middleware, planningApi.middleware, ratingsApi.middleware, shoppingListApi.middleware, cookingModeApi.middleware, sharingApi.middleware),
+    }).concat(api.middleware, planningApi.middleware, ratingsApi.middleware, shoppingListApi.middleware, cookingModeApi.middleware, sharingApi.middleware, communityApi.middleware),
   devTools: __DEV__,
 });
 

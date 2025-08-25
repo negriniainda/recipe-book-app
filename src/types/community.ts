@@ -1,139 +1,261 @@
 export interface CommunityPost {
   id: string;
+  recipeId: string;
   userId: string;
-  username: string;
-  userAvatar?: string;
-  recipeId?: string;
-  content: string;
-  images?: string[];
+  user: CommunityUser;
+  recipe: CommunityRecipe;
+  caption?: string;
+  images: string[];
   videos?: string[];
-
-  likes: number;
-  comments: CommunityComment[];
-  shares: number;
-
-  isPublic: boolean;
-  tags: string[];
-
-  createdAt: Date;
-  updatedAt: Date;
+  
+  // Estatísticas sociais
+  likesCount: number;
+  commentsCount: number;
+  sharesCount: number;
+  
+  // Estado do usuário atual
+  isLiked: boolean;
+  isBookmarked: boolean;
+  
+  // Moderação
+  isReported: boolean;
+  moderationStatus: 'approved' | 'pending' | 'rejected';
+  
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface CommunityComment {
+export interface CommunityUser {
+  id: string;
+  username: string;
+  displayName: string;
+  avatar?: string;
+  bio?: string;
+  isVerified: boolean;
+  
+  // Estatísticas públicas
+  recipesCount: number;
+  followersCount: number;
+  followingCount: number;
+  likesReceived: number;
+  
+  // Estado do usuário atual
+  isFollowing: boolean;
+  isBlocked: boolean;
+  
+  createdAt: string;
+}
+
+export interface CommunityRecipe {
+  id: string;
+  title: string;
+  description?: string;
+  servings: number;
+  prepTime: number;
+  cookTime: number;
+  difficulty: 'easy' | 'medium' | 'hard';
+  categories: string[];
+  tags: string[];
+  mainImage: string;
+  
+  // Estatísticas da comunidade
+  likesCount: number;
+  savesCount: number;
+  triesCount: number;
+  rating: number;
+  reviewsCount: number;
+}
+
+export interface Comment {
   id: string;
   postId: string;
   userId: string;
-  username: string;
-  userAvatar?: string;
+  user: CommunityUser;
   content: string;
-
-  likes: number;
-  replies: CommunityReply[];
-
-  createdAt: Date;
-  updatedAt: Date;
+  parentId?: string; // Para respostas
+  
+  // Estatísticas
+  likesCount: number;
+  repliesCount: number;
+  
+  // Estado do usuário atual
+  isLiked: boolean;
+  
+  // Moderação
+  isReported: boolean;
+  moderationStatus: 'approved' | 'pending' | 'rejected';
+  
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface CommunityReply {
+export interface UserProfile {
   id: string;
-  commentId: string;
-  userId: string;
   username: string;
-  userAvatar?: string;
-  content: string;
-
-  likes: number;
-
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface RecipeCollection {
-  id: string;
-  userId: string;
-  name: string;
-  description?: string;
-  recipeIds: string[];
-  isPublic: boolean;
+  displayName: string;
+  avatar?: string;
   coverImage?: string;
-
-  likes: number;
-  followers: number;
-
-  createdAt: Date;
-  updatedAt: Date;
+  bio?: string;
+  location?: string;
+  website?: string;
+  isVerified: boolean;
+  
+  // Estatísticas
+  recipesCount: number;
+  followersCount: number;
+  followingCount: number;
+  likesReceived: number;
+  totalViews: number;
+  
+  // Estado do usuário atual
+  isFollowing: boolean;
+  isBlocked: boolean;
+  isOwnProfile: boolean;
+  
+  // Configurações de privacidade
+  isPublic: boolean;
+  showEmail: boolean;
+  showStats: boolean;
+  
+  createdAt: string;
+  joinedDate: string;
 }
 
-// Tipos para interações sociais
+export interface Follow {
+  id: string;
+  followerId: string;
+  followingId: string;
+  createdAt: string;
+}
+
 export interface Like {
   id: string;
   userId: string;
-  targetId: string; // pode ser recipeId, postId, commentId, etc.
-  targetType: 'recipe' | 'post' | 'comment' | 'reply' | 'collection';
-  createdAt: Date;
+  postId?: string;
+  commentId?: string;
+  recipeId?: string;
+  type: 'post' | 'comment' | 'recipe';
+  createdAt: string;
 }
 
-export interface Share {
-  id: string;
-  userId: string;
-  targetId: string;
-  targetType: 'recipe' | 'post' | 'collection';
-  platform?:
-    | 'whatsapp'
-    | 'instagram'
-    | 'facebook'
-    | 'twitter'
-    | 'email'
-    | 'link';
-  createdAt: Date;
-}
-
-// Tipos para feed e descoberta
-export interface FeedItem {
-  id: string;
-  type: 'recipe' | 'post' | 'collection' | 'user_follow' | 'achievement';
-  userId: string;
-  username: string;
-  userAvatar?: string;
-  content: any; // Recipe | CommunityPost | RecipeCollection | etc.
-  timestamp: Date;
-  isSponsored?: boolean;
-}
-
-export interface TrendingItem {
-  id: string;
-  type: 'recipe' | 'tag' | 'user' | 'collection';
-  title: string;
-  description?: string;
-  image?: string;
-  score: number; // pontuação de trending
-  timeframe: '24h' | '7d' | '30d';
-}
-
-// Tipos para moderação
 export interface Report {
   id: string;
   reporterId: string;
   targetId: string;
-  targetType: 'recipe' | 'post' | 'comment' | 'user';
-  reason: ReportReason;
+  targetType: 'post' | 'comment' | 'user';
+  reason: 'spam' | 'inappropriate' | 'harassment' | 'copyright' | 'other';
   description?: string;
   status: 'pending' | 'reviewed' | 'resolved' | 'dismissed';
-
-  createdAt: Date;
-  updatedAt: Date;
+  
+  createdAt: string;
+  updatedAt: string;
 }
 
-import {ReportReason} from './enums';
-
-// Tipos para busca na comunidade
-export interface CommunitySearchParams {
-  query?: string;
-  type?: 'recipes' | 'users' | 'posts' | 'collections';
+export interface CommunityFeedFilters {
+  category?: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  prepTime?: number; // máximo em minutos
   tags?: string[];
-  userId?: string;
-  timeframe?: '24h' | '7d' | '30d' | 'all';
-  sortBy?: 'relevance' | 'recent' | 'popular' | 'trending';
-  page?: number;
-  limit?: number;
+  following?: boolean; // apenas de quem segue
+  trending?: boolean; // posts em alta
+  recent?: boolean; // mais recentes
+}
+
+export interface CommunityStats {
+  totalUsers: number;
+  totalRecipes: number;
+  totalPosts: number;
+  totalLikes: number;
+  totalComments: number;
+  activeUsers: number; // últimos 30 dias
+  topCategories: Array<{
+    category: string;
+    count: number;
+  }>;
+  topTags: Array<{
+    tag: string;
+    count: number;
+  }>;
+}
+
+// Estados para gerenciamento
+export interface CommunityState {
+  feed: {
+    posts: CommunityPost[];
+    loading: boolean;
+    error: string | null;
+    hasMore: boolean;
+    page: number;
+    filters: CommunityFeedFilters;
+  };
+  
+  userProfile: {
+    profile: UserProfile | null;
+    posts: CommunityPost[];
+    loading: boolean;
+    error: string | null;
+  };
+  
+  comments: {
+    [postId: string]: {
+      comments: Comment[];
+      loading: boolean;
+      error: string | null;
+    };
+  };
+  
+  following: {
+    users: CommunityUser[];
+    loading: boolean;
+    error: string | null;
+  };
+  
+  stats: CommunityStats | null;
+}
+
+// Tipos para APIs
+export interface CreatePostRequest {
+  recipeId: string;
+  caption?: string;
+  images: string[];
+  videos?: string[];
+}
+
+export interface UpdatePostRequest {
+  caption?: string;
+  images?: string[];
+  videos?: string[];
+}
+
+export interface CreateCommentRequest {
+  postId: string;
+  content: string;
+  parentId?: string;
+}
+
+export interface UpdateCommentRequest {
+  content: string;
+}
+
+export interface FollowUserRequest {
+  userId: string;
+}
+
+export interface ReportContentRequest {
+  targetId: string;
+  targetType: 'post' | 'comment' | 'user';
+  reason: 'spam' | 'inappropriate' | 'harassment' | 'copyright' | 'other';
+  description?: string;
+}
+
+export interface UpdateProfileRequest {
+  displayName?: string;
+  bio?: string;
+  avatar?: string;
+  coverImage?: string;
+  location?: string;
+  website?: string;
+  isPublic?: boolean;
+  showEmail?: boolean;
+  showStats?: boolean;
 }
